@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db, auth } from "../firebase";
+import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import {
@@ -49,15 +49,35 @@ function CreatePortfolio() {
         setError("");
 
         try {
+            // 1. Save raw data to 'portfolios'
             await setDoc(doc(db, "portfolios", user.uid), {
                 ...formData,
                 uid: user.uid,
                 createdAt: serverTimestamp(),
             });
-            navigate("/generate");
+
+            // 2. Call AI API
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) throw new Error('AI Generation failed');
+            const aiContent = await response.json();
+
+            // 3. Save AI response to 'ai_portfolios'
+            await setDoc(doc(db, "ai_portfolios", user.uid), {
+                uid: user.uid,
+                aiContent,
+                generatedAt: serverTimestamp(),
+            });
+
+            // 4. Redirect to public portfolio
+            navigate(`/u/${user.uid}`);
         } catch (err: any) {
-            console.error("Error saving portfolio:", err);
-            setError("Failed to save portfolio data. Please try again.");
+            console.error("Error creating portfolio:", err);
+            setError("Failed to generate AI portfolio. Please try again.");
         } finally {
             setLoading(false);
         }

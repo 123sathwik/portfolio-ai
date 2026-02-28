@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import CreatePortfolio from "./pages/CreatePortfolio";
 import Generate from "./pages/Generate";
+import PublicPortfolio from "./pages/PublicPortfolio";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -16,6 +17,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
+                    <Route path="/u/:uid" element={<PublicPortfolio />} />
                     <Route
                         path="/dashboard"
                         element={

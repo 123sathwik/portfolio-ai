@@ -16,7 +16,8 @@ import {
     ArrowRight,
     Globe,
     Cpu,
-    User
+    User,
+    Layout
 } from "lucide-react";
 
 function PortfolioView() {
@@ -29,13 +30,20 @@ function PortfolioView() {
         const fetchData = async () => {
             if (!uid) return;
             try {
-                const rawDoc = await getDoc(doc(db, "portfolios", uid));
+                // Single fetch from ai_portfolios for better performance
                 const aiDoc = await getDoc(doc(db, "ai_portfolios", uid));
 
-                if (rawDoc.exists() && aiDoc.exists()) {
+                if (aiDoc.exists()) {
+                    const aiData = aiDoc.data();
                     setData({
-                        ...rawDoc.data(),
-                        ai: aiDoc.data().aiContent
+                        name: aiData.name,
+                        role: aiData.role,
+                        improvedAbout: aiData.aiContent.improvedAbout,
+                        improvedSkills: aiData.aiContent.improvedSkills,
+                        improvedProjects: aiData.aiContent.improvedProjects,
+                        headline: aiData.aiContent.headline,
+                        suggestions: aiData.aiContent.suggestions,
+                        summaryScore: aiData.aiContent.summaryScore
                     });
                 }
             } catch (err) {
@@ -58,7 +66,7 @@ function PortfolioView() {
         return (
             <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center gap-4">
                 <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                <p className="text-white/40 font-bold animate-pulse">Loading AI Portfolio...</p>
+                <p className="text-white/40 font-bold animate-pulse">Synchronizing AI Data...</p>
             </div>
         );
     }
@@ -66,204 +74,239 @@ function PortfolioView() {
     if (!data) {
         return (
             <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20">
-                    <Zap size={40} className="text-red-500 opacity-50" />
+                <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 border border-primary/20">
+                    <Zap size={40} className="text-primary opacity-50" />
                 </div>
                 <h1 className="text-4xl font-black mb-4 tracking-tight">Portfolio Not Found</h1>
-                <p className="text-white/40 max-w-sm mb-8">The requested portfolio doesn't exist or hasn't been generated yet.</p>
+                <p className="text-white/40 max-w-sm mb-8 font-medium">This portfolio might still be generating or the link is incorrect.</p>
                 <Link to="/" className="btn-primary">Return Home</Link>
             </div>
         );
     }
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    };
-
-    const itemVariants = {
+    const fadeIn = {
         hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
+        visible: (i: number) => ({
+            opacity: 1,
+            y: 0,
+            transition: { delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+        })
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-primary selection:text-white pb-20">
-            {/* Dynamic Background */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-primary selection:text-white pb-32 overflow-x-hidden">
+            {/* Dynamic Aura Background */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[140px] rounded-full" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-600/5 blur-[140px] rounded-full" />
             </div>
 
-            {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/5">
+            {/* Static Header */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-2xl border-b border-white/5">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/20">
-                            <Zap size={20} className="text-primary" />
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 group-hover:bg-primary group-hover:text-black transition-all">
+                            <Zap size={20} className="text-primary group-hover:text-inherit" />
                         </div>
-                        <span className="font-bold tracking-tight text-white hidden sm:block">{data.name}</span>
-                    </div>
+                        <span className="font-bold tracking-tight text-white/90 group-hover:text-white transition-colors uppercase text-xs tracking-[0.2em]">{data.name}</span>
+                    </Link>
 
-                    <div className="flex items-center gap-6">
-                        <div className="flex gap-4 items-center pr-6 border-r border-white/10 hidden md:flex">
-                            {data.github && <a href={data.github} target="_blank" className="text-white/40 hover:text-white transition-all hover:scale-110"><Github size={18} /></a>}
-                            {data.linkedin && <a href={data.linkedin} target="_blank" className="text-white/40 hover:text-white transition-all hover:scale-110"><Linkedin size={18} /></a>}
-                        </div>
-                        <button
-                            onClick={handleShare}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-bold text-sm"
-                        >
-                            {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
-                            {copied ? "Copied!" : "Share"}
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleShare}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-primary hover:text-black hover:border-primary transition-all font-black text-[10px] uppercase tracking-widest"
+                    >
+                        {copied ? <Check size={14} /> : <Share2 size={14} />}
+                        {copied ? "Copied Link" : "Share Portfolio"}
+                    </button>
                 </div>
             </nav>
 
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="max-w-5xl mx-auto px-6 pt-40 relative z-10"
-            >
-                {/* Hero Section */}
-                <section className="text-center mb-32">
-                    <motion.div variants={itemVariants}>
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary mb-8 uppercase tracking-[0.2em]">
-                            <Sparkles size={12} />
-                            AI Enhanced Profile
-                        </div>
-                        <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40">
-                            {data.name}
-                        </h1>
-                        <h2 className="text-2xl md:text-3xl font-bold text-primary/80 mb-10 tracking-tight">
-                            {data.ai.headline || data.role}
-                        </h2>
-                        <div className="flex flex-wrap justify-center gap-4">
-                            <a href={`mailto:${data.email}`} className="btn-primary flex items-center gap-3 px-8">
-                                <Mail size={18} />
-                                Get in Touch
-                            </a>
-                            <button className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-bold group">
-                                Download Resume
-                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform text-primary" />
-                            </button>
-                        </div>
-                    </motion.div>
-                </section>
+            <main className="max-w-5xl mx-auto px-6 pt-48 relative z-10 space-y-32">
+                {/* HERO SECTION */}
+                <motion.section
+                    custom={0}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeIn}
+                    className="text-center"
+                >
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary mb-10 uppercase tracking-[0.3em]">
+                        <Sparkles size={12} />
+                        AI Refined Identity
+                    </div>
+                    <h1 className="text-6xl md:text-9xl font-black mb-6 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 uppercase">
+                        {data.name}
+                    </h1>
+                    <h2 className="text-xl md:text-2xl font-bold text-white/40 mb-12 tracking-[0.2em] uppercase">
+                        {data.headline}
+                    </h2>
+                    <div className="flex flex-wrap justify-center gap-6">
+                        <button className="btn-primary group px-10 py-5 text-sm">
+                            View Work
+                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                        <button className="px-10 py-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-black text-xs uppercase tracking-widest">
+                            Get in Touch
+                        </button>
+                    </div>
+                </motion.section>
 
-                {/* Bento Grid Content */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-20">
-                    {/* About Section */}
-                    <motion.div variants={itemVariants} className="md:col-span-8 glass-card p-10 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full group-hover:bg-primary/10 transition-all" />
-                        <h3 className="flex items-center gap-3 text-xl font-black mb-8 tracking-tight uppercase text-white/40">
-                            <User size={18} className="text-primary" />
-                            Philosophy
-                        </h3>
-                        <p className="text-xl md:text-2xl text-white/80 leading-relaxed font-medium">
-                            {data.ai.improvedAbout}
-                        </p>
-                    </motion.div>
+                {/* ABOUT SECTION */}
+                <motion.section
+                    custom={1}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeIn}
+                    className="grid grid-cols-1 md:grid-cols-12 gap-8"
+                >
+                    <div className="md:col-span-12 glass-card p-12 md:p-16 relative overflow-hidden group border-primary/10">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full group-hover:bg-primary/10 transition-all duration-1000" />
 
-                    {/* Stats/Brief info */}
-                    <motion.div variants={itemVariants} className="md:col-span-4 glass-card p-10 flex flex-col justify-between border-primary/10">
-                        <h3 className="text-white/40 font-black uppercase tracking-widest text-xs mb-8">Focus Areas</h3>
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><Globe size={20} /></div>
-                                <div>
-                                    <p className="text-sm font-bold">Web Architect</p>
-                                    <p className="text-xs text-white/40">Modern Ecosystems</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><Cpu size={20} /></div>
-                                <div>
-                                    <p className="text-sm font-bold">Problem Solver</p>
-                                    <p className="text-xs text-white/40">Algorithm & Logic</p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
+                        <header className="flex items-center gap-4 mb-12 text-primary/60 font-black uppercase text-xs tracking-[0.3em]">
+                            <Layout size={18} />
+                            The Narrative
+                        </header>
 
-                    {/* Skills Section */}
-                    <motion.div variants={itemVariants} className="md:col-span-12 glass-card p-10">
-                        <h3 className="flex items-center gap-3 text-xl font-black mb-10 tracking-tight uppercase text-white/40">
-                            <Code2 size={20} className="text-primary" />
-                            Tech Stack
-                        </h3>
-                        <div className="flex flex-wrap gap-3">
-                            {data.ai.improvedSkills.split(',').map((skill: string, i: number) => (
-                                <motion.span
-                                    key={skill}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="px-6 py-3 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold text-white/60 hover:border-primary/40 hover:text-white hover:bg-white/[0.08] transition-all cursor-default"
-                                >
-                                    {skill.trim()}
-                                </motion.span>
-                            ))}
-                        </div>
-                    </motion.div>
-
-                    {/* Projects Section */}
-                    <motion.div variants={itemVariants} className="md:col-span-12 glass-card p-10 bg-gradient-to-br from-white/[0.02] to-transparent">
-                        <h3 className="flex items-center gap-3 text-xl font-black mb-10 tracking-tight uppercase text-white/40">
-                            <Award size={20} className="text-primary" />
-                            Major Contributions
-                        </h3>
-                        <div className="prose prose-invert max-w-none">
-                            <p className="text-lg text-white/70 leading-relaxed whitespace-pre-wrap font-medium border-l-2 border-primary/20 pl-8 py-2">
-                                {data.ai.improvedProjects}
+                        <div className="max-w-3xl">
+                            <p className="text-2xl md:text-4xl text-white/80 leading-[1.3] font-medium tracking-tight">
+                                {data.improvedAbout}
                             </p>
                         </div>
-                    </motion.div>
 
-                    {/* AI Suggestions Section */}
-                    <motion.div variants={itemVariants} className="md:col-span-12 p-10 rounded-[32px] bg-primary/5 border border-primary/10">
-                        <div className="flex items-center justify-between mb-8">
-                            <h3 className="flex items-center gap-3 text-xl font-black tracking-tight uppercase text-primary/60">
-                                <Sparkles size={20} className="text-primary" />
-                                Growth Insights
-                            </h3>
-                            <div className="px-3 py-1 bg-primary/10 rounded-lg text-[10px] font-bold text-primary uppercase tracking-wider">
-                                System Score: {data.ai.summaryScore}/100
+                        <footer className="mt-16 pt-12 border-t border-white/5 flex flex-wrap gap-12">
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">Specialization</p>
+                                <p className="font-bold text-white/80">{data.role}</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">Philosophy</p>
+                                <p className="font-bold text-white/80">User-Centric Architecture</p>
+                            </div>
+                        </footer>
+                    </div>
+                </motion.section>
+
+                {/* SKILLS GRID */}
+                <motion.section
+                    custom={2}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeIn}
+                    className="space-y-12"
+                >
+                    <h3 className="flex items-center gap-4 text-xs font-black uppercase tracking-[0.4em] text-white/20">
+                        <TagIcon />
+                        Technical Arsenal
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {data.improvedSkills.split(',').map((skill: string, i: number) => (
+                            <div
+                                key={i}
+                                className="glass-card px-6 py-6 border border-white/5 hover:border-primary/40 hover:bg-white/5 transition-all text-center group cursor-default"
+                            >
+                                <p className="text-sm font-bold text-white/40 group-hover:text-white transition-colors">{skill.trim()}</p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.section>
+
+                {/* PROJECTS CARDS */}
+                <motion.section
+                    custom={3}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeIn}
+                    className="space-y-12"
+                >
+                    <header className="flex justify-between items-end">
+                        <h3 className="flex items-center gap-4 text-xs font-black uppercase tracking-[0.4em] text-white/20">
+                            <Code2 size={18} />
+                            Featured Work
+                        </h3>
+                    </header>
+
+                    <div className="grid grid-cols-1 gap-8">
+                        <div className="glass-card p-12 md:p-16 bg-gradient-to-br from-white/[0.03] to-transparent group border-white/10 hover:border-primary/20 transition-all duration-700">
+                            <div className="max-w-4xl">
+                                <p className="text-xl md:text-2xl text-white/60 leading-relaxed font-medium whitespace-pre-wrap mb-10 group-hover:text-white/80 transition-colors">
+                                    {data.improvedProjects}
+                                </p>
+                                <div className="flex gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
+                                        <Github size={20} />
+                                    </div>
+                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
+                                        <Globe size={20} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {data.ai.suggestions.map((suggestion: string, i: number) => (
-                                <div key={i} className="flex gap-4 p-5 rounded-2xl bg-black/40 border border-white/5 group hover:border-primary/20 transition-all">
-                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary text-xs font-bold">
-                                        {i + 1}
-                                    </div>
-                                    <p className="text-sm font-medium text-white/50 group-hover:text-white/80 transition-colors">
-                                        {suggestion}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </motion.div>
-                </div>
-
-                {/* Footer */}
-                <footer className="text-center pt-20">
-                    <p className="text-white/20 text-xs font-black uppercase tracking-[0.5em] mb-6">
-                        Architected by AI Studio
-                    </p>
-                    <div className="flex justify-center gap-6 text-white/20">
-                        <Github size={20} />
-                        <Globe size={20} />
-                        <Mail size={20} />
                     </div>
-                </footer>
-            </motion.div>
+                </motion.section>
+
+                {/* AI SUGGESTIONS BOX */}
+                <motion.section
+                    custom={4}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeIn}
+                    className="p-12 md:p-16 rounded-[48px] bg-primary/5 border border-primary/20 relative overflow-hidden"
+                >
+                    <div className="absolute top-0 right-0 p-8">
+                        <div className="px-5 py-2 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20">
+                            Portfolio Quality: {data.summaryScore}%
+                        </div>
+                    </div>
+
+                    <h3 className="flex items-center gap-3 text-xl font-black tracking-tight uppercase text-primary/80 mb-12">
+                        <Sparkles size={24} className="text-primary" />
+                        Strategic Recommendations
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                        {data.suggestions.map((suggestion: string, i: number) => (
+                            <div key={i} className="flex gap-6 p-8 rounded-3xl bg-black/40 border border-white/5 group hover:border-primary/20 transition-all hover:-translate-y-1">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary text-xs font-black">
+                                    0{i + 1}
+                                </div>
+                                <p className="text-sm font-bold text-white/40 group-hover:text-white/80 leading-relaxed transition-colors">
+                                    {suggestion}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.section>
+            </main>
+
+            {/* FOOTER */}
+            <footer className="text-center py-40 border-t border-white/5 mt-40">
+                <div className="max-w-7xl mx-auto px-6">
+                    <Zap size={32} className="mx-auto text-primary mb-12 opacity-50" />
+                    <p className="text-white/20 text-[10px] font-black uppercase tracking-[1em] mb-12">
+                        AI Studio • 2026
+                    </p>
+                    <div className="flex justify-center gap-12 font-black text-[10px] uppercase tracking-widest text-white/10">
+                        <a href="#" className="hover:text-primary transition-colors">GitHub</a>
+                        <a href="#" className="hover:text-primary transition-colors">Twitter</a>
+                        <a href="#" className="hover:text-primary transition-colors">Privacy</a>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
+
+// Internal SVG Icon
+const TagIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+        <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2z"></path>
+        <path d="M7 7h.01"></path>
+    </svg>
+);
 
 export default PortfolioView;

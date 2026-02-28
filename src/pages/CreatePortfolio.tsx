@@ -69,6 +69,8 @@ function CreatePortfolio() {
             // 3. Save AI response to 'ai_portfolios'
             await setDoc(doc(db, "ai_portfolios", user.uid), {
                 uid: user.uid,
+                name: formData.name, // Include name for single-fetch view
+                role: formData.role, // Include role for single-fetch view
                 aiContent,
                 generatedAt: serverTimestamp(),
             });

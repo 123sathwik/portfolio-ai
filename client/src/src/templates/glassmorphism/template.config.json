@@ -1,0 +1,11 @@
+{
+    "name": "Glassmorphism",
+    "id": "glassmorphism",
+    "supportsAnimation": true,
+    "supportsThemes": true,
+    "defaultColors": {
+        "primary": "#f472b6",
+        "accent": "#60a5fa",
+        "background": "#0f172a"
+    }
+}

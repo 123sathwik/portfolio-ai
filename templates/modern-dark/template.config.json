@@ -1,0 +1,25 @@
+{
+    "name": "Modern Dark",
+    "id": "modern-dark",
+    "supportsAnimation": true,
+    "supportsThemes": true,
+    "defaultColors": {
+        "primary": "#6366f1",
+        "accent": "#22c55e",
+        "background": "#0a0a0c"
+    },
+    "animationLevels": {
+        "LOW": {
+            "duration": 0.8,
+            "scale": 1
+        },
+        "MEDIUM": {
+            "duration": 0.5,
+            "scale": 1.05
+        },
+        "HIGH": {
+            "duration": 0.3,
+            "scale": 1.1
+        }
+    }
+}

@@ -1,51 +1,19 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Home from "./pages/Home";
+import { Routes, Route } from "react-router-dom";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import PortfolioForm from "./pages/PortfolioForm";
 import Dashboard from "./pages/Dashboard";
-import CreatePortfolio from "./pages/CreatePortfolio";
 import Generate from "./pages/Generate";
-import PortfolioView from "./pages/PortfolioView";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { AuthProvider } from "./context/AuthContext";
 
 function App() {
     return (
-        <AuthProvider>
-            <Router>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/u/:uid" element={<PortfolioView />} />
-                    <Route
-                        path="/dashboard"
-                        element={
-                            <ProtectedRoute>
-                                <Dashboard />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/create-portfolio"
-                        element={
-                            <ProtectedRoute>
-                                <CreatePortfolio />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/generate"
-                        element={
-                            <ProtectedRoute>
-                                <Generate />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </Router>
-        </AuthProvider>
+        <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/create" element={<PortfolioForm />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/generate" element={<Generate />} />
+        </Routes>
     );
 }
 

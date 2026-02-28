@@ -1,34 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { Zap, ChevronRight, Rocket, Github, FileSearch, Palette } from 'lucide-react';
-import { motion } from 'framer-motion';
+import Navbar from "../components/Navbar";
+import { ChevronRight, Zap, Rocket, Github, FileSearch, Palette } from "lucide-react";
+import { motion } from "framer-motion";
 
-function Landing() {
+export default function Landing() {
     const navigate = useNavigate();
 
     return (
         <div className="min-h-screen bg-[#050505] text-white selection:bg-primary selection:text-white">
-            {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                            <Zap size={24} className="text-white" />
-                        </div>
-                        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase tracking-widest text-xs">
-                            AI Studio
-                        </span>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => navigate("/login")}
-                            className="px-6 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-bold transition-all"
-                        >
-                            Login
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             {/* Hero Section */}
             <section className="relative pt-44 pb-32 px-6 overflow-hidden text-center">
@@ -54,12 +34,19 @@ function Landing() {
                                 Create Portfolio
                                 <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
                             </button>
+                            <button
+                                onClick={() => window.scrollTo({ top: 800, behavior: "smooth" })}
+                                className="px-10 py-4 rounded-full font-bold bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
+                            >
+                                Watch Demo
+                            </button>
                         </div>
                     </motion.div>
                 </div>
             </section>
+
+            {/* Placeholder for scroll-to-demo target */}
+            <section id="demo" className="py-20 h-[800px]"></section>
         </div>
     );
 }
-
-export default Landing;

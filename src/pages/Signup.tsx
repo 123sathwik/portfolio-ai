@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { Link, useNavigate } from "react-router-dom";
-import { Zap, Mail, Lock, ChevronRight, AlertCircle, UserPlus } from "lucide-react";
+import { Zap, Mail, Lock, AlertCircle, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 
 function Signup() {
@@ -45,7 +45,7 @@ function Signup() {
                         <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
                             <Zap size={24} className="text-primary" />
                         </div>
-                        <span className="text-2xl font-bold tracking-tight">Portfolio AI Studio</span>
+                        <span className="text-2xl font-bold tracking-tight uppercase tracking-widest text-xs">AI Studio</span>
                     </Link>
                     <h1 className="text-3xl font-black mb-2 tracking-tight">Create Account</h1>
                     <p className="text-white/50 font-medium">Join thousands of developers building with AI.</p>

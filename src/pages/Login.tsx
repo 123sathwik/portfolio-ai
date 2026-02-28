@@ -41,7 +41,7 @@ function Login() {
                         <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
                             <Zap size={24} className="text-primary" />
                         </div>
-                        <span className="text-2xl font-bold tracking-tight">Portfolio AI Studio</span>
+                        <span className="text-2xl font-bold tracking-tight uppercase tracking-widest text-xs">AI Studio</span>
                     </Link>
                     <h1 className="text-3xl font-black mb-2 tracking-tight">Welcome Back</h1>
                     <p className="text-white/50 font-medium">Log in to continue building your portfolio.</p>

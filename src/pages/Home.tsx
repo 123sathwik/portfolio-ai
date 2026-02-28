@@ -35,8 +35,8 @@ function Home() {
                         <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                             <Zap size={24} className="text-white" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
-                            Portfolio AI Studio
+                        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase tracking-widest text-xs">
+                            AI Studio
                         </span>
                     </div>
 
